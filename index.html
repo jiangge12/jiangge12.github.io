@@ -61,7 +61,7 @@
 	</div>
 	
 	<div>
-		<br>本站访问量:<span id="result1"></span> - <span id="year"></span> 
+		<br>悄悄的来，只留下一片云彩:<span id="result1"></span>
 	</div>
 </body>
 
@@ -76,10 +76,6 @@
 	if (localStorage.pagecount)	localStorage.pagecount = Number(localStorage.pagecount) + 1;
 	else localStorage.pagecount = 1;
 	document.getElementById("result1").innerHTML = localStorage.pagecount;
-	//年份获取
-	var myDate = new Date();
-	var year = myDate.getFullYear();
-	document.getElementById('year').innerHTML = year;
 </script>
 
 </html>
