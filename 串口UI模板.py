@@ -1,3 +1,5 @@
+##### 欢迎分享，请保留本行 https://jiangge12.github.io/ #####
+
 import serial,time   # 需要安装库 pip install pyserial
 import serial.tools.list_ports as listport
 import tkinter as tk
