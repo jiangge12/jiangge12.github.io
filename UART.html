@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>串口调试</title>
+</head>
+<body>
+<button onclick="serial()">启动串口调试</button>
+<h2>hamon</h2>
+</body>
+</html>
+<script type="text/javascript">
+    async function serial(){
+        // 浏览器支持serial
+        if ('serial' in navigator) {
+            console.log('当前浏览器支持serial')
+
+            const port = await navigator.serial.requestPort()
+            await port.open({ baudRate: 9600})
+            console.log("port的内容是：", port);
+            const reader = port.readable.getReader();
+
+            try{
+                while(true){
+                    const {value,done} = await reader.read();
+                    if (done) {
+                        reader.releaseLock();
+                        break;
+                    }
+                    console.log("测试value的内容是", value);
+                }
+            }catch (error) {
+                console.error(error)
+            }finally {
+                reader.releaseLock();
+                console.log('允许稍后关闭串口。');
+                await readableStreamClosed.catch(() => { /* Ignore the error */ });
+                await port.close();
+            }
+        }
+    }
+</script>
