@@ -17,7 +17,7 @@
             console.log('当前浏览器支持serial')
 
             const port = await navigator.serial.requestPort()
-            await port.open({ baudRate: 9600})
+            await port.open({ baudRate: 115200})
             console.log("port的内容是：", port);
             const reader = port.readable.getReader();
 
