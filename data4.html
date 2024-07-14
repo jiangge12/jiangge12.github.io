@@ -1,0 +1,11 @@
+<html><body>
+<span id=showImport1></span>
+<IE:Download ID="oDownload1" STYLE="behavior:url(#default#download)" />
+<script>
+function onDownloadDone(downData){
+document.getElementById('showImport1').innerHTML=downData;
+}
+oDownload1.startDownload('data.txt',onDownloadDone)
+</script>
+</body>
+</html>
