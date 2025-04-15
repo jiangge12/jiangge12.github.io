@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Serial Example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+      .sent-text {
+            color: red;
+        }
+      .received-text {
+            color: green;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-4">Web Serial Example</h1>
+        <label for="baudRateSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Baud Rate:</label>
+        <select id="baudRateSelect" class="border border-gray-400 p-2 rounded w-1/2 mb-4">
+            <option value="9600">9600</option>
+            <option value="115200" selected>115200</option>
+            <option value="230400">230400</option>
+            <option value="460800">460800</option>
+        </select>
+        <button id="connectButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
+            Connect to Serial Device
+        </button>
+        <input type="text" id="inputField" placeholder="Type message to send"
+            class="border border-gray-400 p-2 rounded w-1/2 mb-4">
+        <button id="sendButton" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4" disabled>
+            Send
+        </button>
+        <div class="mb-4">
+            <button id="sendFixed1" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2" disabled>
+                Send "SIN"
+            </button>
+            <button id="sendFixed2" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2" disabled>
+                Send "TRI"
+            </button>
+            <button id="sendFixed3" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2" disabled>
+                Send "SQU"
+            </button>
+            <button id="sendFixed4" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded" disabled>
+                Send "OFF"
+            </button>
+        </div>
+        <label for="slider" class="block text-sm font-medium text-gray-700 mb-2">Select a number (1 - 30000000):</label>
+        <input type="range" id="slider" min="1" max="30000000" value="1"
+            class="w-1/2 mb-2">
+        <span id="sliderValue">1</span>
+        <button id="sendSliderValueButton" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mb-4" disabled>
+            Send Slider Value
+        </button>
+        <div id="output" class="border border-gray-400 p-4 rounded h-64 overflow-y-auto"></div>
+    </div>
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        const sendButton = document.getElementById('sendButton');
+        const inputField = document.getElementById('inputField');
+        const output = document.getElementById('output');
+        const sendFixed1 = document.getElementById('sendFixed1');
+        const sendFixed2 = document.getElementById('sendFixed2');
+        const sendFixed3 = document.getElementById('sendFixed3');
+        const sendFixed4 = document.getElementById('sendFixed4');
+        const slider = document.getElementById('slider');
+        const sliderValue = document.getElementById('sliderValue');
+        const sendSliderValueButton = document.getElementById('sendSliderValueButton');
+        const baudRateSelect = document.getElementById('baudRateSelect');
+
+        let port;
+        let writer;
+        let reader;
+
+        async function connectToSerial() {
+            try {
+                const selectedBaudRate = parseInt(baudRateSelect.value);
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: selectedBaudRate });
+
+                writer = port.writable.getWriter();
+                reader = port.readable
+                   .pipeThrough(new TextDecoderStream())
+                   .getReader();
+
+                connectButton.disabled = true;
+                sendButton.disabled = false;
+                sendFixed1.disabled = false;
+                sendFixed2.disabled = false;
+                sendFixed3.disabled = false;
+                sendFixed4.disabled = false;
+                sendSliderValueButton.disabled = false;
+
+                readFromSerial();
+            } catch (error) {
+                console.error('Error connecting to serial device:', error);
+            }
+        }
+
+        async function sendData(message) {
+            if (message && writer) {
+                try {
+                    const data = new TextEncoder().encode(message);
+                    await writer.write(data);
+                    output.innerHTML += `<p class="sent-text">You sent: ${message}</p>`;
+                    output.scrollTop = output.scrollHeight;
+                } catch (error) {
+                    console.error('Error sending data:', error);
+                }
+            }
+        }
+
+        async function readFromSerial() {
+            while (true) {
+                try {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        reader.releaseLock();
+                        break;
+                    }
+                    output.innerHTML += `<p class="received-text">Received: ${value}</p>`;
+                    output.scrollTop = output.scrollHeight;
+                } catch (error) {
+                    console.error('Error reading from serial device:', error);
+                    break;
+                }
+            }
+        }
+
+        slider.addEventListener('input', () => {
+            sliderValue.textContent = slider.value;
+        });
+
+        connectButton.addEventListener('click', connectToSerial);
+        sendButton.addEventListener('click', () => sendData(inputField.value));
+        sendFixed1.addEventListener('click', () => sendData('SIN'));
+        sendFixed2.addEventListener('click', () => sendData('TRI'));
+        sendFixed3.addEventListener('click', () => sendData('SQU'));
+        sendFixed4.addEventListener('click', () => sendData('OFF'));
+        sendSliderValueButton.addEventListener('click', () => sendData(slider.value));
+    </script>
+</body>
+
+</html>9:47 PM 4/15/2025
